@@ -1,0 +1,22 @@
+<div class="p-5">
+  <mat-dialog-content>
+    <mat-form-field appearance="fill">
+      <mat-label>Enter your name</mat-label>
+      <input matInput placeholder="Enter name" [formControl]="name" required />
+      <mat-error *ngIf="name.invalid">{{ getErrorMessage() }}</mat-error>
+    </mat-form-field>
+  </mat-dialog-content>
+  <mat-dialog-actions align="center">
+    <button mat-raised-button color="primary" (click)="saveName()" tabindex="1">
+      Submit
+    </button>
+    <button
+      mat-raised-button
+      color="danger"
+      (click)="closeDialog()"
+      tabindex="1"
+    >
+      Cancel
+    </button>
+  </mat-dialog-actions>
+</div>

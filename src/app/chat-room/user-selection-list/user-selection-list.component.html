@@ -1,0 +1,47 @@
+<div class="text-center">
+  <h2 class="mb-4">User List</h2>
+
+  <ng-container *ngIf="users$ | async as users; else empty">
+    <div class="list-group w-100" wider="true">
+      <a
+        *ngFor="let user of users"
+        href="#"
+        class="list-group-item list-group-item-action waves-light"
+        mdbWavesEffect
+      >
+        {{ user.name }}
+        <span> - Unread </span>
+      </a>
+    </div>
+  </ng-container>
+
+  <div
+    class="btn-group-vertical mt-5"
+    role="group"
+    aria-label="Vertical button group"
+  >
+    <button
+      mdbBtn
+      type="button"
+      color="indigo"
+      class="waves-light mb-4"
+      (click)="openDialog()"
+      mdbWavesEffect
+    >
+      Create User
+    </button>
+    <button
+      mdbBtn
+      type="button"
+      color="indigo"
+      class="waves-light"
+      mdbWavesEffect
+    >
+      Mark Read
+    </button>
+  </div>
+</div>
+
+<ng-template #empty>
+  <h2 class="text-center">There are not users at the moment.</h2>
+</ng-template>
