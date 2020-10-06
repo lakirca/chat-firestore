@@ -36,20 +36,13 @@ export class TherapistChatComponent implements OnInit {
 
   sendMessage(user): void {
     const docTime = formatDate(new Date(), 'yyyy-MM-dd', 'en');
-    const mapTime = formatDate(new Date(), 'HHMMSS.sss', 'en');
+    const mapTime = formatDate(new Date(), 'HHmmss.SSS', 'en');
 
     const data = {};
     data[mapTime] = {
       source: 'Therapist',
       text: this.message,
     };
-
-    this.firestore.collection('users').doc(user.uid).set(
-      {
-        therapist_msg: Date.now(),
-      },
-      { merge: true }
-    );
 
     // Add For Current User
     this.firestore
@@ -59,6 +52,12 @@ export class TherapistChatComponent implements OnInit {
       .doc(`${docTime}`)
       .set(data, { merge: true });
 
+    this.firestore.collection('users').doc(user.uid).set(
+      {
+        therapist_msg: Date.now(),
+      },
+      { merge: true }
+    );
     this.message = '';
   }
 

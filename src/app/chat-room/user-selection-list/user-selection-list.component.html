@@ -5,11 +5,11 @@
     <div class="list-group w-100" wider="true">
       <a
         *ngFor="let user of users$ | async"
+        [ngClass]="{
+          active: user.uid === (currentUser$ | async)?.uid
+        }"
         href="javascript:;"
         class="list-group-item list-group-item-action waves-light"
-        [ngClass]="{
-          active: user.uid === (chatService.getCurrentUser() | async).uid
-        }"
         mdbWavesEffect
         (click)="selectCurrentUser(user)"
       >
@@ -36,11 +36,12 @@
     </button>
     <button
       mdbBtn
+      *ngIf="currentUser$ | async as user"
       type="button"
       color="indigo"
       class="waves-light"
       mdbWavesEffect
-      (click)="markRead()"
+      (click)="markRead(user)"
     >
       Mark Read
     </button>

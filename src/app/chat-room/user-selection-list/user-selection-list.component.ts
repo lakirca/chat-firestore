@@ -13,10 +13,19 @@ import { ChatService } from 'src/app/services/chat.service';
 export class UserSelectionListComponent implements OnInit {
   users$: Observable<User[]>;
 
+  currentUser$: Observable<User>;
+
   constructor(public chatService: ChatService, private dialog: MatDialog) {}
 
   ngOnInit(): void {
     this.users$ = this.chatService.getUsers();
+    this.getCurrentUser();
+  }
+
+  getCurrentUser() {
+    this.chatService.currentUser$.subscribe((data) => {
+      this.currentUser$ = this.chatService.getUserByUid(data.uid);
+    });
   }
 
   openDialog(): void {
@@ -27,8 +36,7 @@ export class UserSelectionListComponent implements OnInit {
     this.chatService.selectUser(user);
   }
 
-  markRead(): void {
-    const user = this.chatService.currentUser$.getValue();
+  markRead(user) {
     this.chatService.markRead(user);
   }
 }

@@ -1,7 +1,8 @@
+import { formatDate } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { filter, map, tap } from 'rxjs/operators';
 import { User } from '../models/user.model';
 
 @Injectable({
@@ -15,6 +16,29 @@ export class ChatService {
 
   getCurrentUser(): Observable<User> {
     return this.currentUser$.asObservable();
+  }
+
+  getUserByUid(uid): Observable<any> {
+    return this.firestore
+      .collection<any>('users')
+      .valueChanges({ idField: 'uid' })
+      .pipe(
+        map((payload) => payload.filter((user) => user.uid === uid)),
+        map((users) => users[0])
+      );
+  }
+
+  getUsers(): Observable<User[]> {
+    return this.firestore
+      .collection<User>('users')
+      .valueChanges({ idField: 'uid' })
+      .pipe(
+        tap((users: User[]) => {
+          if (!this.currentUser$.getValue()) {
+            this.currentUser$.next(users[0]);
+          }
+        })
+      );
   }
 
   createUser(data): Promise<User> {
@@ -32,24 +56,19 @@ export class ChatService {
     return newData;
   }
 
-  getUsers(): Observable<User[]> {
-    return this.firestore
-      .collection<User>('users')
-      .valueChanges({ idField: 'uid' })
-      .pipe(
-        tap((users: User[]) => {
-          if (!this.currentUser$.getValue()) {
-            this.currentUser$.next(users[0]);
-          }
-        })
-      );
-  }
+  markRead(user: User): Promise<any> {
+    const newData = new Promise<User>((resolve, reject) => {
+      this.firestore
+        .collection<User>('users')
+        .doc(`${user.uid}`)
+        .set({ therapist_msg: user.user_msg }, { merge: true })
+        .then(
+          (res) => res,
+          (err) => reject(err)
+        );
+    });
 
-  markRead(user: User): void {
-    this.firestore
-      .collection<User>('users')
-      .doc(`${user.uid}`)
-      .set({ therapist_msg: user.user_msg }, { merge: true });
+    return newData;
   }
 
   selectUser(user): void {
@@ -58,14 +77,28 @@ export class ChatService {
 
   // Snapshot Listener
   getMessages(uid): Observable<any> {
+    const docTime = formatDate(new Date(), 'yyyy-MM-dd', 'en');
+
     return this.firestore
       .collection<User>('users')
       .doc(uid)
       .collection<any>('messages')
       .snapshotChanges()
       .pipe(
-        map((actions) => actions.map((a) => a.payload.doc.data())),
-        map((payload) => payload[0])
+        map((actions) =>
+          actions.map((a) => {
+            const data = a.payload.doc.data();
+            const id = a.payload.doc.id;
+            if (id === docTime) {
+              return data;
+            } else {
+              return [];
+            }
+          })
+        ),
+        map((payload) => {
+          return payload[0];
+        })
       );
   }
 }

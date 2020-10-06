@@ -38,21 +38,13 @@ export class UserChatComponent implements OnInit {
   // and Update *user_msg timestamp value
   sendMessage(user): void {
     const docTime = formatDate(new Date(), 'yyyy-MM-dd', 'en');
-    const mapTime = formatDate(new Date(), 'HHMMSS.sss', 'en');
+    const mapTime = formatDate(new Date(), 'HHmmss.SSS', 'en');
 
     const data = {};
     data[mapTime] = {
       source: user.name,
       text: this.message,
     };
-
-    // Update TimeStamp
-    this.firestore.collection('users').doc(user.uid).set(
-      {
-        user_msg: Date.now(),
-      },
-      { merge: true }
-    );
 
     this.firestore
       .collection('users')
@@ -61,6 +53,13 @@ export class UserChatComponent implements OnInit {
       .doc(`${docTime}`)
       .set(data, { merge: true });
 
+    // Update TimeStamp
+    this.firestore.collection('users').doc(user.uid).set(
+      {
+        user_msg: Date.now(),
+      },
+      { merge: true }
+    );
     this.message = '';
   }
 }
