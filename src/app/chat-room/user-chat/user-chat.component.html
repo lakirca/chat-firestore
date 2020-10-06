@@ -1,44 +1,77 @@
 <ng-container *ngIf="user$ | async as user; else empty">
-  <!-- Chat container-->
-  <div
-    fxLayout="column"
-    fxLayoutAlign="center center"
-    style="width: 50%; min-width: 100%; height: 100%"
-  >
-    <!-- Header -->
-    <app-chat-header
-      style="width: 100%"
-      [chatId]="'chat.id'"
-      fxFlex="64px"
-    ></app-chat-header>
+  <div class="example-sidenav-content border-1">
+    <div class="mesgs" id="container">
+      <cdk-virtual-scroll-viewport itemSize="40" class="msg_history">
+        <div class="header">
+          <h2 class="text-center border-bottom">{{ user.name }}</h2>
+        </div>
+        <ng-container *ngIf="messages$ | async; else noMsgs">
+          <div *cdkVirtualFor="let msg of messages$ | async | keyvalue">
+            <div
+              id="user-chat"
+              *ngIf="msg.value.source === 'Therapist'"
+              class="incoming_msg"
+            >
+              <div class="received_msg">
+                <div class="received_withd_msg">
+                  <h3 class="text-left mb-0">{{ msg.value.source }}</h3>
+                  <text class="text-left">
+                    <p>{{ msg.value.text }}</p>
+                  </text>
+                </div>
+              </div>
+            </div>
 
-    <!-- Messages-->
-    <div fxLayout="column" div="message">
-      <ng-container
-        *ngFor="let msg of messages; trackBy: trackByCreated; let i = index"
-      >
-        <app-chat-message
-          [msg]="msg"
-          [predecessor]="i - 1 >= 0 ? this.messages[i - 1] : null"
-          [user]="user"
-        ></app-chat-message>
-      </ng-container>
+            <div class="outgoing_msg" *ngIf="msg.value.source !== 'Therapist'">
+              <div class="sent_msg">
+                <h3 class="text-right mb-0">{{ msg.value.source }}</h3>
+                <text class="text-right">
+                  <p>{{ msg.value.text }}</p>
+                </text>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </cdk-virtual-scroll-viewport>
 
-      <!-- "is typing" Indicator-->
-      <app-typing-indicator
-        [user]="user"
-        [typing]="'chat.typing'"
-      ></app-typing-indicator>
+      <div class="type_msg">
+        <div class="input_msg_write row">
+          <div class="col">
+            <input
+              mat-input
+              type="text"
+              placeholder="Type a message"
+              [(ngModel)]="message"
+              (keydown.enter)="sendMessage(user)"
+            />
+          </div>
+          <div class="col-auto mt-2">
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+              (click)="sendMessage(user)"
+              (keydown.enter)="sendMessage(user)"
+            >
+              User Send
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <!-- Send form and other controls -->
-    <app-chat-controls
-      style="width: 100%"
-      [chatId]="'chat.id'"
-    ></app-chat-controls>
   </div>
 </ng-container>
 
 <ng-template #empty>
   <h2 class="text-center">There are not users at the moment.</h2>
+</ng-template>
+
+<ng-template #noMsgs>
+  <div class="incoming_msg">
+    <div class="received_msg">
+      <div class="received_withd_msg">
+        <h2 class="text-center">This chat is Empty.</h2>
+      </div>
+    </div>
+  </div>
 </ng-template>

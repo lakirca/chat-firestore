@@ -1,1 +1,73 @@
-<p>therapist-chat works!</p>
+<ng-container *ngIf="user$ | async as user; else empty">
+  <div class="example-sidenav-content border-1">
+    <div class="mesgs" id="container">
+      <cdk-virtual-scroll-viewport itemSize="40" class="msg_history">
+        <div class="header">
+          <h2 class="text-center border-bottom">Therapist</h2>
+        </div>
+        <ng-container *ngIf="messages$ | async; else noMsgs">
+          <div *cdkVirtualFor="let msg of messages$ | async | keyvalue">
+            <div *ngIf="msg.value.source !== 'Therapist'" class="incoming_msg">
+              <div class="received_msg">
+                <div class="received_withd_msg">
+                  <h3 class="text-left mb-0">{{ msg.value.source }}</h3>
+                  <text class="text-left">
+                    <p>{{ msg.value.text }}</p>
+                  </text>
+                </div>
+              </div>
+            </div>
+
+            <div class="outgoing_msg" *ngIf="msg.value.source === 'Therapist'">
+              <div class="sent_msg">
+                <h3 class="text-right mb-0">{{ msg.value.source }}</h3>
+                <text class="text-right">
+                  <p>{{ msg.value.text }}</p>
+                </text>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </cdk-virtual-scroll-viewport>
+
+      <div class="type_msg">
+        <div class="input_msg_write row">
+          <div class="col">
+            <input
+              mat-input
+              type="text"
+              placeholder="Type a message"
+              [(ngModel)]="message"
+              (keydown.enter)="sendMessage(user)"
+            />
+          </div>
+          <div class="col-auto mt-2">
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+              (click)="sendMessage(user)"
+              (keydown.enter)="sendMessage(user)"
+            >
+              Therapist Send
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #empty>
+  <h2 class="text-center">There are not users at the moment.</h2>
+</ng-template>
+
+<ng-template #noMsgs>
+  <div class="incoming_msg">
+    <div class="received_msg">
+      <div class="received_withd_msg">
+        <h2 class="text-center">This chat is Empty.</h2>
+      </div>
+    </div>
+  </div>
+</ng-template>

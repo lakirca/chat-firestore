@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { UserService } from 'src/app/services/user.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateUserDialogComponent } from 'src/app/chat-room/components/create-user-dialog/create-user-dialog.component';
+import { User } from 'src/app/models/user.model';
+import { ChatService } from 'src/app/services/chat.service';
 
 @Component({
   selector: 'app-user-selection-list',
@@ -10,24 +11,24 @@ import { CreateUserDialogComponent } from 'src/app/chat-room/components/create-u
   styleUrls: ['./user-selection-list.component.scss'],
 })
 export class UserSelectionListComponent implements OnInit {
-  users$: Observable<any[]>;
+  users$: Observable<User[]>;
 
-  constructor(private userService: UserService, private dialog: MatDialog) {}
+  constructor(public chatService: ChatService, private dialog: MatDialog) {}
 
   ngOnInit(): void {
-    this.getUsers();
-    this.users$ = this.userService.getUsers();
+    this.users$ = this.chatService.getUsers();
   }
-
-  getUsers(): void {
-    this.userService.getUsers().subscribe((user) => {
-      console.log('Current User', user);
-    });
-  }
-
-  getCurrentUser(): any {}
 
   openDialog(): void {
     this.dialog.open(CreateUserDialogComponent);
+  }
+
+  selectCurrentUser(user): void {
+    this.chatService.selectUser(user);
+  }
+
+  markRead(): void {
+    const user = this.chatService.currentUser$.getValue();
+    this.chatService.markRead(user);
   }
 }

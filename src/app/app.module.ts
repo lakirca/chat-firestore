@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -28,7 +28,9 @@ import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatInputModule } from '@angular/material/input';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 
 // Other
 import { AppRoutingModule } from './app-routing.module';
@@ -55,10 +57,13 @@ import { CreateUserDialogComponent } from './chat-room/components/create-user-di
   imports: [
     BrowserModule,
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
+    ScrollingModule,
     MatFormFieldModule,
     MatGridListModule,
+    MatProgressSpinnerModule,
     MatCardModule,
     MatProgressBarModule,
     MatListModule,

@@ -1,8 +1,9 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { formatDate } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { User } from 'src/app/models/user.model';
+import { ChatService } from 'src/app/services/chat.service';
 
 @Component({
   selector: 'app-user-chat',
@@ -10,54 +11,56 @@ import { map } from 'rxjs/operators';
   styleUrls: ['./user-chat.component.scss'],
 })
 export class UserChatComponent implements OnInit {
-  @Input() height: string;
-  @Input() width: string;
-
-  chat$: Observable<any>;
-  user$: Observable<any> = undefined;
-  messages: any[] = [];
+  messages$: Observable<any>;
+  user$: Observable<User>;
+  message: string;
 
   constructor(
-    private afs: AngularFirestore // public auth: FirebaseAuthService // public chatService: FirebaseChatService,
+    private firestore: AngularFirestore,
+    private chatService: ChatService
   ) {}
 
-  ngOnInit() {
-    // const chatId = this.route.snapshot.paramMap.get('id');
-    // TODO: first load already existing history
-    // TODO: listen on changes
-    // const source = this.chatService.getHistory(chatId);
-    // this.chat$ = this.chatService.buildChat(source).pipe(
-    // tap((res) => this.integrateNewMessages(res)),
-    // tap(() => this.scrollBottom())
-    // );
+  ngOnInit(): void {
+    this.user$ = this.chatService.currentUser$.asObservable();
+    this.getData();
   }
 
-  private integrateNewMessages(chat) {
-    const newMessages = chat.messages.filter(
-      (newMessage: any /* Message */) =>
-        !this.messages.some((message: any /* Message */) =>
-          this.isSameMessage(message, newMessage)
-        )
+  // On Current Selected User Get Messages for Selected User
+  getData(): void {
+    this.chatService.getCurrentUser().subscribe((data: any) => {
+      if (data) {
+        this.messages$ = this.chatService.getMessages(data.uid);
+      }
+    });
+  }
+
+  // Send Message for Current User,
+  // and Update *user_msg timestamp value
+  sendMessage(user): void {
+    const docTime = formatDate(new Date(), 'yyyy-MM-dd', 'en');
+    const mapTime = formatDate(new Date(), 'HHMMSS.sss', 'en');
+
+    const data = {};
+    data[mapTime] = {
+      source: user.name,
+      text: this.message,
+    };
+
+    // Update TimeStamp
+    this.firestore.collection('users').doc(user.uid).set(
+      {
+        user_msg: Date.now(),
+      },
+      { merge: true }
     );
-    newMessages.forEach((msg) => this.messages.push(msg));
-  }
 
-  private isSameMessage(
-    message: any /* Message */,
-    newMessage: any /* Message */
-  ): boolean {
-    return (
-      message.content === newMessage.content &&
-      message.uid === newMessage.uid &&
-      message.createdAt.isSame(newMessage.createdAt)
-    );
-  }
+    this.firestore
+      .collection('users')
+      .doc(user.uid)
+      .collection('messages')
+      .doc(`${docTime}`)
+      .set(data, { merge: true });
 
-  trackByCreated(msg) {
-    return msg.createdAt;
-  }
-
-  private scrollBottom() {
-    setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 500);
+    this.message = '';
   }
 }

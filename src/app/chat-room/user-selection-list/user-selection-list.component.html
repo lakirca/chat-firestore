@@ -1,16 +1,20 @@
 <div class="text-center">
   <h2 class="mb-4">User List</h2>
 
-  <ng-container *ngIf="users$ | async as users; else empty">
+  <ng-container *ngIf="users$ | async; else empty">
     <div class="list-group w-100" wider="true">
       <a
-        *ngFor="let user of users"
-        href="#"
+        *ngFor="let user of users$ | async"
+        href="javascript:;"
         class="list-group-item list-group-item-action waves-light"
+        [ngClass]="{
+          active: user.uid === (chatService.getCurrentUser() | async).uid
+        }"
         mdbWavesEffect
+        (click)="selectCurrentUser(user)"
       >
         {{ user.name }}
-        <span> - Unread </span>
+        <span *ngIf="user.therapist_msg !== user.user_msg"> - Unread </span>
       </a>
     </div>
   </ng-container>
@@ -36,6 +40,7 @@
       color="indigo"
       class="waves-light"
       mdbWavesEffect
+      (click)="markRead()"
     >
       Mark Read
     </button>
